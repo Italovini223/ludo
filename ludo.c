@@ -13,7 +13,7 @@ struct jogador {
 
 int jogarDado();
 void preencheDadosDosJogadores( struct jogador *jogadores, int quantidade);
-bool verificaCor(char cor[]);
+bool verificaCor(char *cor[]);
 
 
 
@@ -72,8 +72,8 @@ void preencheDadosDosJogadores( struct jogador *jogadores, int quantidade){
 
 }
 
-bool verificaCor(char cor[]){
-    char coresValidas[4][20] = { "vermelho", "amarelo", "verde", "azul" };
+bool verificaCor(char *cor[]){
+    char coresValidas[4][20] = { "vermelho", "amarelo", "verde", "azul" }; // verificar
     int quantidadeDeValida = 0;
     bool corEValida;
 
@@ -81,7 +81,7 @@ bool verificaCor(char cor[]){
     for(int i = 0; i < 4; i++){
         quantidadeDeValida = 0;
 
-        quantidadeDeValida = strcmp(coresValidas[i], cor);
+        quantidadeDeValida = strcmp(coresValidas[i], cor); // logica dando algum erro -> provalvelente cor esta vindo sem \0 
 
         printf("%d\n\n", quantidadeDeValida);
 
@@ -90,7 +90,6 @@ bool verificaCor(char cor[]){
         }
     }
 
-    printf("%d", quantidadeDeValida);
 
     if(quantidadeDeValida == 0){
         corEValida = true;
