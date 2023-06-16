@@ -6,14 +6,14 @@
 #include<stdbool.h>
 
 struct jogador {
-    char nome[20], cor[20];
-    int pecas[4];
+    char nome[20];
+    int pecas[4], cor;
 };
 
 
 int jogarDado();
 void preencheDadosDosJogadores( struct jogador *jogadores, int quantidade);
-bool verificaCor(char *cor[]);
+bool verificaCor(int cor, struct jogador jogador[], int quantidadeDeJogadores);
 
 
 
@@ -39,7 +39,6 @@ int main(){
 
 int jogarDado(){
 
-    // função responsavel pela parte de jogar o dado;
     int numero;
 
     numero = rand()%6;
@@ -56,48 +55,50 @@ void preencheDadosDosJogadores( struct jogador *jogadores, int quantidade){
         fgets(jogadores[i].nome, 20, stdin);
 
         do{
-            printf("%s digite uma cor\n", jogadores[i].nome);
-            printf("varmelho, azul, verde ou amarelo: ");
-            setbuf(stdin, NULL);
-            gets(jogadores[i].nome);
-            //fgets(jogadores[i].cor, 20, stdin);
+            do{
+                printf("\n%s escolha uma das cores\n", jogadores[i].nome);
+                printf("(1) - vermelho\n");
+                printf("(2) - azul\n");
+                printf("(3) - amarelo\n");
+                printf("(4) - verde\n");
+                printf("Digite sua opcao: ");
+                scanf("%d", &jogadores[i].cor);
+
+                if(jogadores[i].cor != 1 && jogadores[i].cor != 2 && jogadores[i].cor != 3 && jogadores[i].cor != 4){
+                    printf("\n\nDigite uma opcao de cor valida!\n\n");
+                }
+        
+            }while(jogadores[i].cor != 1 && jogadores[i].cor != 2 && jogadores[i].cor != 3 && jogadores[i].cor != 4);
+         
             
-            corValida = verificaCor(jogadores[i].cor);
+            corValida = verificaCor(jogadores[i].cor, jogadores, quantidade);
 
             if(corValida == false){
-                printf("Digite um cor valida! \n\n");
+                printf("\n\ncor ja selecionada, por favor escolha outra! \n\n");
             }
+
         }while(corValida != true);
     }
 
 }
 
-bool verificaCor(char *cor[]){
-    char coresValidas[4][20] = { "vermelho", "amarelo", "verde", "azul" }; // verificar
-    int quantidadeDeValida = 0;
+bool verificaCor(int cor, struct jogador jogadores[], int quantidadeDeJogadores){
+    int corRepetida = 0;
     bool corEValida;
 
 
-    for(int i = 0; i < 4; i++){
-        quantidadeDeValida = 0;
-
-        quantidadeDeValida = strcmp(coresValidas[i], cor); // logica dando algum erro -> provalvelente cor esta vindo sem \0 
-
-        printf("%d\n\n", quantidadeDeValida);
-
-        if(quantidadeDeValida == 0){
-            break;
+    for(int i=0; i < quantidadeDeJogadores; i++){
+        if(jogadores[i].cor == cor){
+            corRepetida++;
         }
     }
 
-
-    if(quantidadeDeValida == 0){
+    if(corRepetida < 2){
         corEValida = true;
-    } else {
+    } else if(corRepetida >= 2) {
         corEValida = false;
     }
 
     return corEValida;
-
-
 }
+
