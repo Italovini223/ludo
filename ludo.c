@@ -62,10 +62,10 @@ int main(){
                 
                 for(int j = 0; j < 4; j++){
                     if(jogadores[i].pecas[j] == 0){
-                        jogadores[i].pecasParaJogar[j] = jogadores[i].pecas[j+1];
+                        jogadores[i].pecasParaJogar[j] = j+1;
                         possibilidadeDeJogadas++;
                     } else {
-                        jogadores[i].pecasParaJogar[j] = jogadores[i].pecas[j+1];
+                        jogadores[i].pecasParaJogar[j] = j+1;
                         possibilidadeDeJogadas++;
                     }
                 }
@@ -73,7 +73,7 @@ int main(){
             } else {
                 for(int j = 0; j < 4; j++){
                     if(jogadores[i].pecas[j] > 0){
-                       jogadores[i].pecasParaJogar[j] = jogadores[i].pecas[j+1];
+                       jogadores[i].pecasParaJogar[j] = j+1;
                        possibilidadeDeJogadas++;
                     }
                     
@@ -114,7 +114,7 @@ int main(){
         haVencedor = varificaSeAVencedor(jogadores, quantidadeDeJogadores);
 
         if(i == quantidadeDeJogadores){
-            i == 0;
+            i = 0;
         }
     }
 
@@ -126,7 +126,7 @@ int jogarDado(){
     int numero;
 
     do {
-        numero = (rand()%6);
+        numero = (rand()%6) + 1;
     } while(numero == 0);
     
 
@@ -140,6 +140,12 @@ void preencheDadosDosJogadores( struct jogador *jogadores, int quantidade){
         printf("jogador %d digite o seu nome: ", i+1);
         setbuf(stdin, NULL);
         fgets(jogadores[i].nome, 20, stdin);
+
+        for(int j = 0; jogadores[i].nome[j] != '\0'; j++){
+            if(jogadores[i].nome[j] == '\n'){
+                jogadores[i].nome[j] = '\0';
+            }
+        }
 
         do{
             do{
