@@ -5,6 +5,12 @@
 #include<time.h>
 #include<stdbool.h>
 
+#ifdef _WIN32 || _WIN64
+    #include <Windows.h>
+#else
+    #include <unistd.h>
+#endif
+
 struct peca {
     int posicao;
     bool chegouPrimeiroNaPosicao;
@@ -23,7 +29,7 @@ bool verificaCor(int cor, struct jogador jogador[], int quantidadeDeJogadores);
 bool pecaMeixaEValida(struct jogador *jogador, int pecaSelecionada);
 bool varificaSeAVencedor(struct jogador jogadores[], int quantidadeDeJogadores);
 void zeraPosicaoDasPecas(struct jogador jogadores[], int qunatidadeDeJogadores);
-void zeraAsPecasQuePodemJogar(struct jogador jogadores[], int posicaoDoJogador);
+void zeraAsPecasQuePodemJogar(struct jogador *jogador);
 void MovimentaPeca(int quantidadeASerMexida, struct jogador *jogador, int pecaASerMexida);
 
 
@@ -32,7 +38,6 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador *jogador, int pecaAS
 int main(){
     srand(time(NULL));
     bool pecaEValida, haVencedor;
-    int tabuleiro[15][15];
     int dado, quantidadeDeJogadores = 2, possibilidadeDeJogadas = 0;
     int pecaMexida;
     char stringVazia[3];
@@ -48,9 +53,9 @@ int main(){
         jogadores[i].jogasRepetidas = 0;
 
         do{
-            zeraAsPecasQuePodemJogar(jogadores, i);
-            dado = jogarDado();
             possibilidadeDeJogadas = 0;
+            zeraAsPecasQuePodemJogar(&jogadores[i]);
+            dado = jogarDado();
             
             printf("Jogador %s, voce triou %d no dado!\n ", jogadores[i].nome, dado);
 
@@ -70,6 +75,8 @@ int main(){
                 }
 
             } else {
+                printf("\n\nENTROU NO ELSE \n\n");
+
                 for(int j = 0; j < 4; j++){
                     if(jogadores[i].pecas[j].posicao > 0){
                        jogadores[i].pecasParaJogar[j] = j+1;
@@ -80,11 +87,14 @@ int main(){
 
             }
 
+            printf("\n\nPossibilidade de jogadas => %d\n\n", possibilidadeDeJogadas);
+
             if(possibilidadeDeJogadas > 0){
                 for(int j = 0; j < 4; j++){
                     if(jogadores[i].pecasParaJogar[j] > 0 && jogadores[i].pecasParaJogar[j] <= 4){
                         printf("digite %d para mover a peca %d por %d casas!\n", jogadores[i].pecasParaJogar[j], jogadores[i].pecasParaJogar[j], dado);
                     }
+                    
                 }
 
                 do {
@@ -97,7 +107,7 @@ int main(){
                         printf("\n\nEscolha uma peca Valida!\n\n");
                     }
 
-                    MovimentaPeca(dado, jogadores, pecaMexida);
+                    MovimentaPeca(dado, &jogadores[i], pecaMexida);
                 } while(pecaEValida != true);
                 
             } else {
@@ -116,6 +126,9 @@ int main(){
         }while(dado == 6);
 
         printf("\n\nsaiu do do\n\n");
+
+        Sleep(1000);
+        system("cls");
 
         haVencedor = varificaSeAVencedor(jogadores, quantidadeDeJogadores);
 
@@ -151,27 +164,22 @@ void preencheDadosDosJogadores( struct jogador *jogadores, int quantidade){
         }
 
         do{
-            do{
-                printf("\n%s escolha uma das cores\n", jogadores[i].nome);
-                printf("(1) - vermelho\n");
-                printf("(2) - azul\n");
-                printf("Digite sua opcao: ");
-                scanf("%d", &jogadores[i].cor);
-
-                if(jogadores[i].cor != 1 && jogadores[i].cor != 2){
-                    printf("\n\nDigite uma opcao de cor valida!\n\n");
-                }
-        
-            }while(jogadores[i].cor != 1 && jogadores[i].cor != 2 && jogadores[i].cor != 3 && jogadores[i].cor != 4);
-         
-            
+          
+            printf("\n%s escolha uma das cores\n", jogadores[i].nome);
+            printf("(1) - vermelho\n");
+            printf("(2) - azul\n");
+            printf("Digite sua opcao: ");
+            scanf("%d", &jogadores[i].cor);
+  
             corValida = verificaCor(jogadores[i].cor, jogadores, quantidade);
 
             if(corValida == false){
-                printf("\n\ncor ja selecionada, por favor escolha outra! \n\n");
+                printf("\n\ncor ja selecionada ou invalida, por favor escolha outra! \n\n");
             }
 
         }while(corValida != true);
+        Sleep(1000);
+        system("cls");
     }
 
 }
@@ -187,9 +195,9 @@ bool verificaCor(int cor, struct jogador jogadores[], int quantidadeDeJogadores)
         }
     }
 
-    if(corRepetida < 2){
+    if(corRepetida == 1){
         corEValida = true;
-    } else if(corRepetida >= 2) {
+    } else{
         corEValida = false;
     }
 
@@ -204,24 +212,28 @@ void zeraPosicaoDasPecas(struct jogador jogadores[], int qunatidadeDeJogadores){
     }
 }
 
-void zeraAsPecasQuePodemJogar(struct jogador jogadores[], int posicaoDoJogador){
+void zeraAsPecasQuePodemJogar(struct jogador *jogador){
     for(int i = 0; i < 4; i++){
-        jogadores[posicaoDoJogador].pecasParaJogar[i] = 0;
+        jogador->pecasParaJogar[i] = 0;
     }
 }
 
 void MovimentaPeca(int quantidadeASerMexida, struct jogador *jogador, int pecaASerMexida){
 
-    if(jogador->pecas[pecaASerMexida].posicao == 0 && quantidadeASerMexida == 6){
-        jogador->pecas[pecaASerMexida].posicao = 1;
+    if(jogador->pecas[pecaASerMexida - 1].posicao == 0 && quantidadeASerMexida == 6){
+
+        printf("\n\nposicao anteriro da peca %d => %d\n\n", pecaASerMexida, jogador->pecas[pecaASerMexida - 1].posicao);
+
+        jogador->pecas[pecaASerMexida - 1].posicao = 1;
 
     } else {
-        jogador->pecas[pecaASerMexida].posicao += quantidadeASerMexida;
+        printf("\n\nposicao anteriro da peca %d => %d\n\n", pecaASerMexida, jogador->pecas[pecaASerMexida - 1].posicao);
+        jogador->pecas[pecaASerMexida - 1].posicao += quantidadeASerMexida;
     }
 
    
 
-   printf("A peca %d agora esta na posicao %d\n\n", pecaASerMexida, jogador->pecas[pecaASerMexida].posicao);
+   printf("A peca %d agora esta na posicao %d\n\n", pecaASerMexida, jogador->pecas[pecaASerMexida - 1].posicao);
 }
 
 bool pecaMeixaEValida(struct jogador *jogador, int pecaSelecionada){
