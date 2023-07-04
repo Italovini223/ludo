@@ -11,9 +11,10 @@
     #include <unistd.h>
 #endif
 
+int tabuleiro[56];
+
 struct peca {
     int posicao;
-    bool chegouPrimeiroNaPosicao;
 };
 
 struct jogador {
@@ -28,10 +29,13 @@ void preencheDadosDosJogadores( struct jogador *jogadores, int quantidade);
 bool verificaCor(int cor, struct jogador jogador[], int quantidadeDeJogadores);
 bool pecaMeixaEValida(struct jogador *jogador, int pecaSelecionada);
 bool varificaSeAVencedor(struct jogador jogadores[], int quantidadeDeJogadores);
-void zeraPosicaoDasPecas(struct jogador jogadores[], int qunatidadeDeJogadores);
+void zeraPosicaoDasPecasETabuleiro(struct jogador jogadores[], int qunatidadeDeJogadores);
 void zeraAsPecasQuePodemJogar(struct jogador *jogador);
-void MovimentaPeca(int quantidadeASerMexida, struct jogador *jogador, int pecaASerMexida);
+void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[], int posicaoJogador, int pecaASerMexida);
 void mostraPosicaoDasPecas(struct jogador *jogador);
+
+
+
 
 
 
@@ -40,12 +44,14 @@ int main(){
     srand(time(NULL));
     bool pecaEValida, haVencedor;
     int dado, quantidadeDeJogadores = 2, possibilidadeDeJogadas = 0;
-    int pecaMexida;
-    char stringVazia[3];
+    int pecaMexida; // para o jogador digitar sua opcao de peca;
+    char stringVazia[3]; // somente para o jogdor apertar enter 
+    
     struct jogador jogadores[quantidadeDeJogadores];
 
+
     preencheDadosDosJogadores(jogadores, quantidadeDeJogadores);
-    zeraPosicaoDasPecas(jogadores, quantidadeDeJogadores);
+    zeraPosicaoDasPecasETabuleiro(jogadores, quantidadeDeJogadores);
 
     for(int i = 0; haVencedor != true; i++){
         if (i > 1){
@@ -112,7 +118,7 @@ int main(){
                         printf("\n\nEscolha uma peca Valida!\n\n");
                     }
 
-                    MovimentaPeca(dado, &jogadores[i], pecaMexida);
+                    MovimentaPeca(dado, jogadores, i, pecaMexida);
                 } while(pecaEValida != true);
                 
             } else {
@@ -208,12 +214,19 @@ bool verificaCor(int cor, struct jogador jogadores[], int quantidadeDeJogadores)
     return corEValida;
 }
 
-void zeraPosicaoDasPecas(struct jogador jogadores[], int qunatidadeDeJogadores){
+void zeraPosicaoDasPecasETabuleiro(struct jogador jogadores[], int qunatidadeDeJogadores){
     for(int i = 0; i < qunatidadeDeJogadores; i++){
         for(int j = 0; j < 4; j++){
             jogadores[i].pecas[j].posicao = 0;
         }
+
     }
+
+    for(int k = 0; k < 56; k++){
+        tabuleiro[k] = 0;
+    }
+
+
 }
 
 void zeraAsPecasQuePodemJogar(struct jogador *jogador){
@@ -222,14 +235,54 @@ void zeraAsPecasQuePodemJogar(struct jogador *jogador){
     }
 }
 
-void MovimentaPeca(int quantidadeASerMexida, struct jogador *jogador, int pecaASerMexida){
-    if(jogador->pecas[pecaASerMexida - 1].posicao == 0 && quantidadeASerMexida == 6){
-        jogador->pecas[pecaASerMexida - 1].posicao = 1;
+void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int posicaoJogador, int pecaASerMexida){
+    int posicaoAnterior = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao;
+
+
+    if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == 0 && quantidadeASerMexida == 6){
+        jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = 1;
 
     } else {
-        jogador->pecas[pecaASerMexida - 1].posicao += quantidadeASerMexida;
+        jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao += quantidadeASerMexida;
     }
-   printf("A peca %d agora esta na posicao %d\n\n", pecaASerMexida, jogador->pecas[pecaASerMexida - 1].posicao);
+
+    
+    
+
+    if(tabuleiro[jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao] == 0){
+        tabuleiro[jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao] = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao;
+
+        printf("A peca %d agora esta na posicao %d\n\n", pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao);
+
+    } else{
+        for(int i = 0; i < 4; i++){
+            for(int j = 0; j < 4; j++){
+                if(posicaoJogador == 0){
+                    if(jogadores[posicaoJogador].pecas[i].posicao == jogadores[1].pecas[j].posicao){
+                        jogadores[1].pecas[j].posicao = 0;
+
+                        printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[1].nome, j+1, jogadores[1].pecas[j].posicao);
+                        Sleep(500);
+                        return;
+                    }
+                } else if(posicaoJogador == 1){
+                    if(jogadores[posicaoJogador].pecas[i].posicao == jogadores[0].pecas[j].posicao){
+                        jogadores[0].pecas[j].posicao = 0;
+
+                        printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[0].nome, j+1, jogadores[0].pecas[j].posicao);
+                        Sleep(500);
+                        return;
+                
+                    }
+                }
+            }
+        }
+    }
+    
+    tabuleiro[posicaoAnterior] -= posicaoAnterior;
+
+    printf(" VALOR NA POSICAO %d NO VETOR DEPOIS DA PECA MEXIDA => %d", posicaoAnterior, tabuleiro[posicaoAnterior]);
+
 }
 
 bool pecaMeixaEValida(struct jogador *jogador, int pecaSelecionada){
