@@ -11,7 +11,13 @@
     #include <unistd.h>
 #endif
 
-int tabuleiro[56];
+int tabuleiro[61];
+int areaSegura[6] = {1, 9, 22, 25, 35, 40};
+
+
+
+// (1) => comeca a vermelha - 9 - 22 - 35 - (40) => comeca azul - 48 
+// 
 
 struct peca {
     int posicao;
@@ -33,6 +39,7 @@ void zeraPosicaoDasPecasETabuleiro(struct jogador jogadores[], int qunatidadeDeJ
 void zeraAsPecasQuePodemJogar(struct jogador *jogador);
 void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[], int posicaoJogador, int pecaASerMexida);
 void mostraPosicaoDasPecas(struct jogador *jogador);
+bool verificaSePosicaoESegura(int posicao);
 
 
 
@@ -235,15 +242,53 @@ void zeraAsPecasQuePodemJogar(struct jogador *jogador){
     }
 }
 
+bool verificaSePosicaoESegura(int posicao){
+    bool posicaoEsegura;
+    int eSegura = 0;
+
+    for(int i = 0; i < 6; i++){
+        if(posicao == areaSegura[i]){
+            eSegura++;
+        }
+    }
+
+    if(eSegura == 1){
+        posicaoEsegura = true;
+    } else {
+        posicaoEsegura = false;
+    }
+
+    return posicaoEsegura;
+}
+
 void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int posicaoJogador, int pecaASerMexida){
+
+    bool posicaoEsegura;
     int posicaoAnterior = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao;
 
 
     if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == 0 && quantidadeASerMexida == 6){
-        jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = 1;
 
+        if(jogadores[posicaoJogador].cor == 1){
+            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = 1;
+        } else if(jogadores[posicaoJogador].cor == 2){
+            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = 40;
+        }
+        
     } else {
-        jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao += quantidadeASerMexida;
+
+        if((jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao + quantidadeASerMexida) == 53 && jogadores[posicaoJogador].cor == 2){
+            jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao = 1;
+
+        } else if((jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao + quantidadeASerMexida) >= 53 && jogadores[posicaoJogador].cor == 2){
+            quantidadeASerMexida = (jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao += quantidadeASerMexida) - 53;
+
+            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = (quantidadeASerMexida + 1);
+        } else {
+            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao += quantidadeASerMexida;
+        }
+
+        
     }
 
     
@@ -257,20 +302,23 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
     } else{
         for(int i = 0; i < 4; i++){
             for(int j = 0; j < 4; j++){
+                posicaoEsegura = verificaSePosicaoESegura(jogadores[posicaoJogador].pecas[i].posicao);
+
                 if(posicaoJogador == 0){
-                    if(jogadores[posicaoJogador].pecas[i].posicao == jogadores[1].pecas[j].posicao){
+                    if(jogadores[posicaoJogador].pecas[i].posicao == jogadores[1].pecas[j].posicao && posicaoEsegura == false){
                         jogadores[1].pecas[j].posicao = 0;
 
                         printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[1].nome, j+1, jogadores[1].pecas[j].posicao);
-                        Sleep(500);
+                        Sleep(2000);
                         return;
                     }
                 } else if(posicaoJogador == 1){
-                    if(jogadores[posicaoJogador].pecas[i].posicao == jogadores[0].pecas[j].posicao){
+                    if(jogadores[posicaoJogador].pecas[i].posicao == jogadores[0].pecas[j].posicao && posicaoEsegura == false){
                         jogadores[0].pecas[j].posicao = 0;
-
+                        
+                        
                         printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[0].nome, j+1, jogadores[0].pecas[j].posicao);
-                        Sleep(500);
+                        Sleep(2000);
                         return;
                 
                     }
