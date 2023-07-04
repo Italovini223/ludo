@@ -303,26 +303,23 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
         for(int i = 0; i < 4; i++){
             posicaoEsegura = verificaSePosicaoESegura(jogadores[posicaoJogador].pecas[i].posicao);
 
-            for(int j = 0; j < 4; j++){
+            if(posicaoJogador == 0){
+                if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == jogadores[1].pecas[i].posicao && posicaoEsegura == false){
+                    jogadores[1].pecas[i].posicao = 0;
 
-                if(posicaoJogador == 0){
-                    if(jogadores[posicaoJogador].pecas[i].posicao == jogadores[1].pecas[j].posicao && posicaoEsegura == false){
-                        jogadores[1].pecas[j].posicao = 0;
-
-                        printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[1].nome, j+1, jogadores[1].pecas[j].posicao);
-                        Sleep(2000);
-                        return;
-                    }
-                } else if(posicaoJogador == 1){
-                    if(jogadores[posicaoJogador].pecas[i].posicao == jogadores[0].pecas[j].posicao && posicaoEsegura == false){
-                        jogadores[0].pecas[j].posicao = 0;
+                    printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[1].nome, i+1, jogadores[1].pecas[i].posicao);
+                    Sleep(2000);
+                    return;
+                }
+            } else if(posicaoJogador == 1){
+                if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == jogadores[0].pecas[i].posicao && posicaoEsegura == false){
+                    jogadores[0].pecas[i].posicao = 0;
                         
-                        system("cls");
-                        printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[0].nome, j+1, jogadores[0].pecas[j].posicao);
-                        Sleep(2000);
-                        return;
+                    system("cls");
+                    printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[0].nome, i+1, jogadores[0].pecas[i].posicao);
+                    Sleep(2000);
+                    return;
                 
-                    }
                 }
             }
         }
