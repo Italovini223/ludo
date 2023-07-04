@@ -281,9 +281,9 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
             jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao = 1;
 
         } else if((jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao + quantidadeASerMexida) >= 53 && jogadores[posicaoJogador].cor == 2){
-            quantidadeASerMexida = (jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao += quantidadeASerMexida) - 53;
+            quantidadeASerMexida = (jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao += quantidadeASerMexida) - 52;
 
-            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = (quantidadeASerMexida + 1);
+            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = quantidadeASerMexida;
         } else {
             jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao += quantidadeASerMexida;
         }
@@ -301,8 +301,9 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
 
     } else{
         for(int i = 0; i < 4; i++){
+            posicaoEsegura = verificaSePosicaoESegura(jogadores[posicaoJogador].pecas[i].posicao);
+
             for(int j = 0; j < 4; j++){
-                posicaoEsegura = verificaSePosicaoESegura(jogadores[posicaoJogador].pecas[i].posicao);
 
                 if(posicaoJogador == 0){
                     if(jogadores[posicaoJogador].pecas[i].posicao == jogadores[1].pecas[j].posicao && posicaoEsegura == false){
@@ -316,7 +317,7 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
                     if(jogadores[posicaoJogador].pecas[i].posicao == jogadores[0].pecas[j].posicao && posicaoEsegura == false){
                         jogadores[0].pecas[j].posicao = 0;
                         
-                        
+                        system("cls");
                         printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[0].nome, j+1, jogadores[0].pecas[j].posicao);
                         Sleep(2000);
                         return;
