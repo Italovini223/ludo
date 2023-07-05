@@ -5,14 +5,19 @@
 #include<time.h>
 #include<stdbool.h>
 
+
 #ifdef _WIN32 || _WIN64
     #include <Windows.h>
 #else
     #include <unistd.h>
 #endif
 
-int tabuleiro[61];
-int areaSegura[6] = {1, 9, 22, 25, 35, 40};
+int tabuleiro[53];
+
+int areaSegura[6] = {1, 9, 22, 35, 40};
+
+int areaFinalAzul[6];
+int areaFinalVermelho[6];
 
 
 
@@ -85,10 +90,10 @@ int main(){
 
                 
                 for(int j = 0; j < 4; j++){
-                    if(jogadores[i].pecas[j].posicao == 0){
+                    if((jogadores[i].pecas[j].posicao + dado) < 57 && jogadores[i].cor == 2){
                         jogadores[i].pecasParaJogar[j] = j+1;
                         possibilidadeDeJogadas++;
-                    } else {
+                    } else if((jogadores[i].pecas[j].posicao + dado) < 30 && jogadores[i].cor == 1){
                         jogadores[i].pecasParaJogar[j] = j+1;
                         possibilidadeDeJogadas++;
                     }
@@ -272,7 +277,7 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
         if(jogadores[posicaoJogador].cor == 1){
             jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = 1;
         } else if(jogadores[posicaoJogador].cor == 2){
-            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = 40;
+            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = 27;
         }
         
     } else {
@@ -290,6 +295,30 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
 
         
     }
+
+    if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao >= 26 && jogadores[posicaoJogador].cor == 2){
+
+        if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == 26){
+            tabuleiro[posicaoAnterior] -= posicaoAnterior;
+        }
+
+        areaFinalAzul[quantidadeASerMexida - 25] = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao;
+
+        printf("A peca %d agora esta na posicao %d na area Segura\n\n", pecaASerMexida, areaFinalAzul[quantidadeASerMexida - 25]);
+        return;
+
+    } else if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao >= 52 && jogadores[posicaoJogador].cor == 1){
+
+        if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == 52){
+            tabuleiro[posicaoAnterior] -= posicaoAnterior;
+        }
+
+        areaFinalVermelho[quantidadeASerMexida - 52] = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao;
+
+
+        printf("A peca %d agora esta na posicao %d na area Segura\n\n", pecaASerMexida, areaFinalVermelho[quantidadeASerMexida - 52]);
+        return;
+    } 
 
     
     
@@ -359,12 +388,10 @@ bool varificaSeAVencedor(struct jogador jogadores[], int quantidadeDeJogadores){
     for(int i = 0; i < quantidadeDeJogadores; i++){
         pecasFinalizadas = 0;
         for(int j = 0; j < 4; j++){
-            if(jogadores[i].pecas[j].posicao == 56){
+            if(jogadores[i].pecas[j].posicao == 57 && jogadores[i].cor == 1){
                 pecasFinalizadas++;
-
-                if(pecasFinalizadas == 4){
-                    break;
-                }
+            } else if(jogadores[i].pecas[j].posicao == 31 && jogadores[i].cor == 2){
+                pecasFinalizadas++;
             }
         }
 
