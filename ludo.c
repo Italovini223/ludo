@@ -14,7 +14,7 @@
 
 int tabuleiro[53];
 
-int areaSegura[6] = {1, 9, 22, 35, 40};
+int areaSegura[8] = {1, 9, 14, 22, 27, 35, 40, 48};
 
 int areaFinalAzul[6];
 int areaFinalVermelho[6];
@@ -26,6 +26,8 @@ int areaFinalVermelho[6];
 
 struct peca {
     int posicao;
+    bool completouUmaVoltaNoTabuleiro;
+    bool estaNaAreaFinal;
 };
 
 struct jogador {
@@ -90,10 +92,10 @@ int main(){
 
                 
                 for(int j = 0; j < 4; j++){
-                    if((jogadores[i].pecas[j].posicao + dado) < 57 && jogadores[i].cor == 2){
+                    if(((jogadores[i].pecas[j].posicao + dado) <= 31 || jogadores[i].pecas[j].estaNaAreaFinal == false) && jogadores[i].cor == 2){ // azul
                         jogadores[i].pecasParaJogar[j] = j+1;
                         possibilidadeDeJogadas++;
-                    } else if((jogadores[i].pecas[j].posicao + dado) < 30 && jogadores[i].cor == 1){
+                    } else if((jogadores[i].pecas[j].posicao + dado) <= 57 && jogadores[i].cor == 1){ // vermelho
                         jogadores[i].pecasParaJogar[j] = j+1;
                         possibilidadeDeJogadas++;
                     }
@@ -101,9 +103,12 @@ int main(){
 
             } else {
                 for(int j = 0; j < 4; j++){
-                    if(jogadores[i].pecas[j].posicao > 0){
-                       jogadores[i].pecasParaJogar[j] = j+1;
-                       possibilidadeDeJogadas++;
+                    if(((jogadores[i].pecas[j].posicao + dado) <= 31 || jogadores[i].pecas[j].estaNaAreaFinal == false) && jogadores[i].pecas[j].posicao > 0 && jogadores[i].cor == 2){ // azul
+                        jogadores[i].pecasParaJogar[j] = j+1;
+                        possibilidadeDeJogadas++;
+                    } else if((jogadores[i].pecas[j].posicao + dado) < 57 && jogadores[i].pecas[j].posicao > 0 && jogadores[i].cor == 1){ // vermelho
+                        jogadores[i].pecasParaJogar[j] = j+1;
+                        possibilidadeDeJogadas++;
                     }
                     
                 }
@@ -130,8 +135,10 @@ int main(){
                         printf("\n\nEscolha uma peca Valida!\n\n");
                     }
 
-                    MovimentaPeca(dado, jogadores, i, pecaMexida);
+                    
                 } while(pecaEValida != true);
+
+                MovimentaPeca(dado, jogadores, i, pecaMexida);
                 
             } else {
                 printf("Voce nao pode movimentar nenhuma peca!\n");
@@ -230,7 +237,13 @@ void zeraPosicaoDasPecasETabuleiro(struct jogador jogadores[], int qunatidadeDeJ
     for(int i = 0; i < qunatidadeDeJogadores; i++){
         for(int j = 0; j < 4; j++){
             jogadores[i].pecas[j].posicao = 0;
+
+            jogadores[i].pecas[j].completouUmaVoltaNoTabuleiro = false;
+            jogadores[i].pecas[j].estaNaAreaFinal = false;
+
         }
+
+
 
     }
 
@@ -275,73 +288,79 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
     if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == 0 && quantidadeASerMexida == 6){
 
         if(jogadores[posicaoJogador].cor == 1){
-            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = 1;
+            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = 1; // coloca a peca na posicao 1 se a cor for vermelha
         } else if(jogadores[posicaoJogador].cor == 2){
-            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = 27;
+            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = 27; // coloca a peca na posicao 27 se for da cor azul
         }
         
     } else {
 
-        if((jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao + quantidadeASerMexida) == 53 && jogadores[posicaoJogador].cor == 2){
-            jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao = 1;
+        if((jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao + quantidadeASerMexida) == 53 && jogadores[posicaoJogador].cor == 2){ // verifica se a proxia casa do peao azul for a 53
+            jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao = 1; // se for ele coloca a peca na casa 1
+            jogadores[posicaoJogador].pecas[pecaASerMexida -1].completouUmaVoltaNoTabuleiro = true;
 
-        } else if((jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao + quantidadeASerMexida) >= 53 && jogadores[posicaoJogador].cor == 2){
-            quantidadeASerMexida = (jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao += quantidadeASerMexida) - 52;
-
-            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = quantidadeASerMexida;
+        } else if((jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao + quantidadeASerMexida) >= 53 && jogadores[posicaoJogador].cor == 2){ //verifica se a soma da posicao da peca + a quantidada a ser mexia e maior que 53, se a cor do jogador for a azul
+            quantidadeASerMexida = (jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao += quantidadeASerMexida) - 52; // se for ele pega essa quantidade e subtrai 52 
+            jogadores[posicaoJogador].pecas[pecaASerMexida -1].completouUmaVoltaNoTabuleiro = true;
+            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = quantidadeASerMexida; // e coloca esse peao na casa certa
         } else {
-            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao += quantidadeASerMexida;
+            jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao += quantidadeASerMexida; // se nao se encaixar nas condicoes acima ele somente soma a proxima casa do peao
         }
 
         
     }
 
-    if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao >= 26 && jogadores[posicaoJogador].cor == 2){
+    if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao >= 26 && jogadores[posicaoJogador].pecas[pecaASerMexida -1].completouUmaVoltaNoTabuleiro == true  && jogadores[posicaoJogador].cor == 2){ // verifica se a proxima casa do peao do jogador azul e maior ou igual a 26
 
-        if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == 26){
-            tabuleiro[posicaoAnterior] -= posicaoAnterior;
+        if(posicaoAnterior <= 25){ // se for igual a 26 qur dizer que ele veio da posicao 25 do tabuleiro
+            tabuleiro[posicaoAnterior] -= posicaoAnterior; // com isso limpamos a posicao 25 para que funcione a logica de comer a peca;
+
         }
 
-        areaFinalAzul[quantidadeASerMexida - 25] = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao;
+        jogadores[posicaoJogador].pecas[pecaASerMexida - 1].estaNaAreaFinal = true;
 
-        printf("A peca %d agora esta na posicao %d na area Segura\n\n", pecaASerMexida, areaFinalAzul[quantidadeASerMexida - 25]);
-        return;
+        areaFinalAzul[quantidadeASerMexida - 25] = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao; // aqui ele coloca a peca do jogador azul na area final que e segura
 
-    } else if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao >= 52 && jogadores[posicaoJogador].cor == 1){
+        printf("A peca %d agora esta na posicao %d na area Segura\n\n", pecaASerMexida, (jogadores[posicaoJogador].pecas[quantidadeASerMexida -1 ].posicao - 25));
+        return; // retornamos porque como a logica abaixo se refere ao tabuleiro
+
+    } else if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao >= 52 && jogadores[posicaoJogador].cor == 1){ // aqui acontece a mesma coisa porem com as pecas do jogador vermelho;
 
         if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == 52){
             tabuleiro[posicaoAnterior] -= posicaoAnterior;
         }
 
-        areaFinalVermelho[quantidadeASerMexida - 52] = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao;
+        areaFinalVermelho[jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao - 52] = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao;
+        jogadores[posicaoJogador].pecas[pecaASerMexida - 1].estaNaAreaFinal = true;
 
 
-        printf("A peca %d agora esta na posicao %d na area Segura\n\n", pecaASerMexida, areaFinalVermelho[quantidadeASerMexida - 52]);
-        return;
+        printf("A peca %d agora esta na posicao %d na area Segura\n", pecaASerMexida, jogadores[posicaoJogador].pecas[quantidadeASerMexida -1 ].posicao - 52);
+        return;// retornamos porque como a logica abaixo se refere ao tabuleiro
     } 
 
     
     
 
-    if(tabuleiro[jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao] == 0){
-        tabuleiro[jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao] = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao;
+    if(tabuleiro[jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao] == 0){ // aqui e verificado se a posicao do tabulerio para onde a peca do jogador ira esta vazia
+        tabuleiro[jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao] = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao; // se estiver a peca va para a posicao do tabuleiro normalmente;
 
         printf("A peca %d agora esta na posicao %d\n\n", pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao);
 
-    } else{
+    } else{ // agora se a posicao ja estiver ocupada
         for(int i = 0; i < 4; i++){
-            posicaoEsegura = verificaSePosicaoESegura(jogadores[posicaoJogador].pecas[i].posicao);
+            posicaoEsegura = verificaSePosicaoESegura(jogadores[posicaoJogador].pecas[i].posicao); // primeiro verificamos se essa peca nao e uma area segura do tabuleiro;
 
-            if(posicaoJogador == 0){
-                if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == jogadores[1].pecas[i].posicao && posicaoEsegura == false){
-                    jogadores[1].pecas[i].posicao = 0;
-
+            if(posicaoJogador == 0){ // aqui se o jogador que esta mexendo a peca e o jogador 1
+                if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == jogadores[1].pecas[i].posicao && posicaoEsegura == false && jogadores[posicaoJogador].pecas[pecaASerMexida - 1].estaNaAreaFinal == false){ // verificamos se ha alguma peca do jogador 2 nessa posicao e se essa posicao nao e segura
+                    jogadores[1].pecas[i].posicao = 0; // se estiver alguma peca na posicao voltamos ela para fora do tabuleiro da jogo
+                    
+                    system("cls");
                     printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[1].nome, i+1, jogadores[1].pecas[i].posicao);
                     Sleep(2000);
-                    return;
+                    
                 }
-            } else if(posicaoJogador == 1){
-                if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == jogadores[0].pecas[i].posicao && posicaoEsegura == false){
+            } else if(posicaoJogador == 1){ // aqui a mesma logica acima porem, se o jogador que estiver jogando for o 2
+                if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == jogadores[0].pecas[i].posicao && posicaoEsegura == false && jogadores[posicaoJogador].pecas[pecaASerMexida - 1].estaNaAreaFinal == false){
                     jogadores[0].pecas[i].posicao = 0;
                         
                     system("cls");
@@ -354,7 +373,7 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
         }
     }
     
-    tabuleiro[posicaoAnterior] -= posicaoAnterior;
+    tabuleiro[posicaoAnterior] -= posicaoAnterior; // aqui pegamos a pocisao anterior que a peca jogada estava e limpamos ela 
 
     printf(" VALOR NA POSICAO %d NO VETOR DEPOIS DA PECA MEXIDA => %d", posicaoAnterior, tabuleiro[posicaoAnterior]);
 
@@ -383,24 +402,28 @@ bool varificaSeAVencedor(struct jogador jogadores[], int quantidadeDeJogadores){
 
     bool haVencedor;
     int pecasFinalizadas = 0;
+    int i;
 
 
-    for(int i = 0; i < quantidadeDeJogadores; i++){
+    for(i = 0; i < quantidadeDeJogadores; i++){
         pecasFinalizadas = 0;
         for(int j = 0; j < 4; j++){
             if(jogadores[i].pecas[j].posicao == 57 && jogadores[i].cor == 1){
                 pecasFinalizadas++;
-            } else if(jogadores[i].pecas[j].posicao == 31 && jogadores[i].cor == 2){
+            } else if(jogadores[i].pecas[j].posicao == 31 && jogadores[i].pecas[j].estaNaAreaFinal == true && jogadores[i].cor == 2){
                 pecasFinalizadas++;
             }
         }
 
         if(pecasFinalizadas == 4){
             haVencedor = true;
+
+            printf("Parabens jogador %s voce ganhou a partida!!!!!", jogadores[i].nome);
         } else{
             haVencedor = false;
         }
     }
+
 
     return haVencedor;
 }
@@ -410,8 +433,16 @@ void mostraPosicaoDasPecas(struct jogador *jogador){
 
     printf("Jogador %s, esta e a posicao das suas pecas: \n", jogador->nome);
 
-    for(int i = 0; i < 4; i++){
-        printf("A peca %d esta na posicao %d\n", i+1, jogador->pecas[i].posicao);
+    for(int i = 0; i < 4; i++){ 
+        if(jogador->pecas[i].estaNaAreaFinal == true){
+            if(jogador->cor == 1){ //vermelho
+                printf("A peca %d esta na posicao %d do quadrante final\n", i+1, jogador->pecas[i].posicao - 51);
+            } else if(jogador->cor == 2){ // azul 
+                printf("A peca %d esta na posicao %d do quadrante final\n", i+1, jogador->pecas[i].posicao - 25);
+            } 
+        } else {
+            printf("A peca %d esta na posicao %d\n", i+1, jogador->pecas[i].posicao);
+        }
     }
 
     printf("\n");
