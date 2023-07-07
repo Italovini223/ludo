@@ -56,7 +56,7 @@ bool verificaSePosicaoESegura(int posicao);
 
 int main(){
     srand(time(NULL));
-    bool pecaEValida, haVencedor;
+    bool pecaEValida, haVencedor = false;
     int dado, quantidadeDeJogadores = 2, possibilidadeDeJogadas = 0;
     int pecaMexida; // para o jogador digitar sua opcao de peca;
     char stringVazia[3]; // somente para o jogdor apertar enter 
@@ -67,11 +67,18 @@ int main(){
     preencheDadosDosJogadores(jogadores, quantidadeDeJogadores);
     zeraPosicaoDasPecasETabuleiro(jogadores, quantidadeDeJogadores);
 
-    for(int i = 0; haVencedor != true; i++){
+    for(int i = 0; haVencedor == false; i++){
         if (i > 1){
             i = 0;
         }
+
+
         jogadores[i].jogasRepetidas = 0;
+
+        if(haVencedor == true){
+            break;
+        }
+
 
         do{
             possibilidadeDeJogadas = 0;
@@ -162,6 +169,8 @@ int main(){
         haVencedor = varificaSeAVencedor(jogadores, quantidadeDeJogadores);
 
     }
+
+    return 0;
 
     
 }
@@ -326,7 +335,7 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
 
     } else if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao >= 52 && jogadores[posicaoJogador].cor == 1){ // aqui acontece a mesma coisa porem com as pecas do jogador vermelho;
 
-        if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == 52){
+        if(posicaoAnterior <= 52){
             tabuleiro[posicaoAnterior] -= posicaoAnterior;
         }
 
@@ -346,9 +355,12 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
 
         printf("A peca %d agora esta na posicao %d\n\n", pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao);
 
+        printf(" \n\n ENTROU NA POSICAO VAZIA DO TABULEIRO \n\n");
+
     } else{ // agora se a posicao ja estiver ocupada
 
      posicaoEsegura = verificaSePosicaoESegura(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao); // primeiro verificamos se essa peca nao e uma area segura do tabuleiro;
+        
         for(int i = 0; i < 4; i++){
             if(posicaoJogador == 0){ // aqui se o jogador que esta mexendo a peca e o jogador 1
                 if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao == jogadores[1].pecas[i].posicao && posicaoEsegura == false && jogadores[posicaoJogador].pecas[pecaASerMexida - 1].estaNaAreaFinal == false){ // verificamos se ha alguma peca do jogador 2 nessa posicao e se essa posicao nao e segura
@@ -364,6 +376,7 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
                     system("cls");
                     printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[1].nome, i+1, jogadores[1].pecas[i].posicao);
                     Sleep(2000);
+
                     
                 }
             } else if(posicaoJogador == 1){ // aqui a mesma logica acima porem, se o jogador que estiver jogando for o 2
@@ -378,7 +391,7 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
                     system("cls");
                     printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[0].nome, i+1, jogadores[0].pecas[i].posicao);
                     Sleep(2000);
-                    return;
+                    
                 
                 }
             }
