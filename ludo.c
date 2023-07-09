@@ -13,7 +13,6 @@
 #endif
 
 int tabuleiro[53];
-
 int areaSegura[8] = {1, 9, 14, 22, 27, 35, 40, 48};
 
 int areaFinalAzul[6];
@@ -41,16 +40,12 @@ int jogarDado();
 void preencheDadosDosJogadores( struct jogador *jogadores, int quantidade);
 bool verificaCor(int cor, struct jogador jogador[], int quantidadeDeJogadores);
 bool pecaMeixaEValida(struct jogador *jogador, int pecaSelecionada);
-bool varificaSeAVencedor(struct jogador jogadores[], int quantidadeDeJogadores);
+bool varificaSeAVencedor(struct jogador jogadores[], int quantidadeDeJogadores, FILE *historico);
 void zeraPosicaoDasPecasETabuleiro(struct jogador jogadores[], int qunatidadeDeJogadores);
 void zeraAsPecasQuePodemJogar(struct jogador *jogador);
-void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[], int posicaoJogador, int pecaASerMexida);
+void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[], int posicaoJogador, int pecaASerMexida, FILE *historico);
 void mostraPosicaoDasPecas(struct jogador *jogador);
 bool verificaSePosicaoESegura(int posicao);
-
-
-
-
 
 
 
@@ -59,9 +54,16 @@ int main(){
     bool pecaEValida, haVencedor;
     int dado, quantidadeDeJogadores = 2, possibilidadeDeJogadas = 0;
     int pecaMexida; // para o jogador digitar sua opcao de peca;
-    char stringVazia[3]; // somente para o jogdor apertar enter 
-    
+    char stringVazia[3]; // somente para o jogdor apertar enter;
+    FILE *historico;
+
     struct jogador jogadores[quantidadeDeJogadores];
+    historico = fopen("historico.txt","w");
+
+    if(historico == NULL){
+        printf("Erro ao abrir o arquivo");
+        exit(1);
+    }
 
 
     preencheDadosDosJogadores(jogadores, quantidadeDeJogadores);
@@ -84,16 +86,17 @@ int main(){
                 system("color 1");
             }
 
-            if(jogadores[i].jogasRepetidas == 3){
-                printf("\n Jogador %s como voce tirou 6 por %d vezes seguidas perdeu a vez!", jogadores[i].nome, jogadores[i].jogasRepetidas);
-                break;
-            }
             
             printf("Jogador %s, voce triou %d no dado!\n ", jogadores[i].nome, dado);
 
             if(dado == 6){
 
                 jogadores[i].jogasRepetidas++;
+
+                if(jogadores[i].jogasRepetidas == 3){
+                    printf("\n Jogador %s como voce tirou 6 por %d vezes seguidas perdeu a vez!", jogadores[i].nome, jogadores[i].jogasRepetidas);
+                    break;
+                }
 
                 
                 for(int j = 0; j < 4; j++){
@@ -143,11 +146,11 @@ int main(){
                     
                 } while(pecaEValida != true);
 
-                MovimentaPeca(dado, jogadores, i, pecaMexida);
+                MovimentaPeca(dado, jogadores, i, pecaMexida, historico);
                 
             } else {
                 printf("Voce nao pode movimentar nenhuma peca!\n");
-                printf("Aperte qualquer tecla para continuar para continuar");
+                printf("Aperte ENTER para continuar para continuar");
                 setbuf(stdin, NULL);
                 gets(stringVazia);
             }
@@ -160,9 +163,10 @@ int main(){
 
         }while(dado == 6);
 
-        haVencedor = varificaSeAVencedor(jogadores, quantidadeDeJogadores);
+        haVencedor = varificaSeAVencedor(jogadores, quantidadeDeJogadores, historico);
     }
 
+    fclose(historico);
     return 0;
 
     
@@ -276,7 +280,7 @@ bool verificaSePosicaoESegura(int posicao){
     return posicaoEsegura;
 }
 
-void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int posicaoJogador, int pecaASerMexida){
+void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int posicaoJogador, int pecaASerMexida, FILE *historico){
 
     bool posicaoEsegura;
     int posicaoAnterior = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao;
@@ -317,8 +321,10 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
         jogadores[posicaoJogador].pecas[pecaASerMexida - 1].estaNaAreaFinal = true;
 
         areaFinalAzul[quantidadeASerMexida - 25] = jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao; // aqui ele coloca a peca do jogador azul na area final que e segura
+    
 
-        printf("A peca %d agora esta na posicao %d na area Segura\n\n", pecaASerMexida, (jogadores[posicaoJogador].pecas[quantidadeASerMexida -1 ].posicao - 25));
+        printf("A peca %d agora esta na posicao %d na area Segura\n\n", pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida -1 ].posicao - 25);
+        fprintf(historico, "Jogador %s A peca %d agora esta na posicao %d na area Segura\n", jogadores[posicaoJogador].nome, pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida -1 ].posicao - 25);
         return; // retornamos porque como a logica abaixo se refere ao tabuleiro
 
     } else if(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao >= 52 && jogadores[posicaoJogador].cor == 1){ // aqui acontece a mesma coisa porem com as pecas do jogador vermelho;
@@ -331,7 +337,8 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
         jogadores[posicaoJogador].pecas[pecaASerMexida - 1].estaNaAreaFinal = true;
 
 
-        printf("A peca %d agora esta na posicao %d na area Segura\n", pecaASerMexida, jogadores[posicaoJogador].pecas[quantidadeASerMexida -1 ].posicao - 52);
+        printf("A peca %d agora esta na posicao %d na area Segura\n", pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida -1 ].posicao - 52);
+        fprintf(historico, "Jogador %s a peca %d agora esta na posicao %d na area Segura\n", jogadores[posicaoJogador].nome, pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida -1 ].posicao - 52); 
         return;// retornamos porque como a logica abaixo se refere ao tabuleiro
     } 
 
@@ -342,6 +349,7 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
         tabuleiro[jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao] += jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao; // se estiver a peca va para a posicao do tabuleiro normalmente;
 
         printf("A peca %d agora esta na posicao %d\n\n", pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao);
+        fprintf(historico, "Jogador %s a peca %d agora esta na posicao %d\n", jogadores[posicaoJogador].nome, pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao);
 
     } else{ // agora se a posicao ja estiver ocupada
         posicaoEsegura = verificaSePosicaoESegura(jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao); // primeiro verificamos se essa peca nao e uma area segura do tabuleiro;
@@ -349,6 +357,7 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
         tabuleiro[jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao] += jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao; // colaca a peca na nova posicao;
         
         printf("A peca %d agora esta na posicao %d\n\n", pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao);
+        fprintf(historico, "Jogador %s A peca %d agora esta na posicao %d\n", jogadores[posicaoJogador].nome, pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao);
 
         for(int i = 0; i < 4; i++){
             if(posicaoJogador == 0){ // aqui se o jogador que esta mexendo a peca e o jogador 1
@@ -367,6 +376,7 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
 
                     system("cls");
                     printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[1].nome, i+1, jogadores[1].pecas[i].posicao);
+                    fprintf(historico, "Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[1].nome, i+1, jogadores[1].pecas[i].posicao);
                     Sleep(2000);
 
                     
@@ -385,6 +395,7 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
                         
                     system("cls");
                     printf("Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[0].nome, i+1, jogadores[0].pecas[i].posicao);
+                    fprintf(historico, "Jogador %s sua peca %d foi comida e voltou para a posicao %d\n", jogadores[0].nome, i+1, jogadores[0].pecas[i].posicao);
                     Sleep(2000);
                     
                 
@@ -394,8 +405,6 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
     }
     
     tabuleiro[posicaoAnterior] -= posicaoAnterior; // aqui pegamos a pocisao anterior que a peca jogada estava e limpamos ela 
-
-    printf("\n\nA posicao anterior da peca %d que era %d agora e no tabuleiro => %d\n\n", pecaASerMexida, posicaoAnterior, tabuleiro[posicaoAnterior]); // => TESTE
 
 
 }
@@ -419,7 +428,7 @@ bool pecaMeixaEValida(struct jogador *jogador, int pecaSelecionada){
     return pecaVailda;
 }
 
-bool varificaSeAVencedor(struct jogador jogadores[], int quantidadeDeJogadores){
+bool varificaSeAVencedor(struct jogador jogadores[], int quantidadeDeJogadores, FILE *historico){
 
     bool haVencedor;
     int pecasFinalizadas = 0;
@@ -440,6 +449,7 @@ bool varificaSeAVencedor(struct jogador jogadores[], int quantidadeDeJogadores){
             haVencedor = true;
 
             printf("Parabens jogador %s voce ganhou a partida!!!!!", jogadores[i].nome);
+            fprintf(historico, "Parabens jogador %s voce ganhou a partida!!!!!\n", jogadores[i].nome);
         } else{
             haVencedor = false;
         }
