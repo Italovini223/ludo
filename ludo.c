@@ -301,7 +301,7 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
             jogadores[posicaoJogador].pecas[pecaASerMexida -1].completouUmaVoltaNoTabuleiro = true;
 
         } else if((jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao + quantidadeASerMexida) >= 53 && jogadores[posicaoJogador].cor == 2){ //verifica se a soma da posicao da peca + a quantidada a ser mexia e maior que 53, se a cor do jogador for a azul
-            quantidadeASerMexida = (jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao += quantidadeASerMexida) - 52; // se for ele pega essa quantidade e subtrai 52 
+            quantidadeASerMexida = (jogadores[posicaoJogador].pecas[pecaASerMexida -1].posicao + quantidadeASerMexida) - 52; // se for ele pega essa quantidade e subtrai 52 
             jogadores[posicaoJogador].pecas[pecaASerMexida -1].completouUmaVoltaNoTabuleiro = true;
             jogadores[posicaoJogador].pecas[pecaASerMexida - 1].posicao = quantidadeASerMexida; // e coloca esse peao na casa certa
         } else {
