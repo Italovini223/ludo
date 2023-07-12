@@ -337,7 +337,7 @@ void MovimentaPeca(int quantidadeASerMexida, struct jogador jogadores[],  int po
         jogadores[posicaoJogador].pecas[pecaASerMexida - 1].estaNaAreaFinal = true;
 
 
-        printf("A peca %d agora esta na posicao %d na area Segura\n", pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida -1 ].posicao - 52);
+        printf("A peca %d agora esta na posicao %d na area Segura\n", pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida -1 ].posicao - 51);
         fprintf(historico, "Jogador %s a peca %d agora esta na posicao %d na area Segura\n", jogadores[posicaoJogador].nome, pecaASerMexida, jogadores[posicaoJogador].pecas[pecaASerMexida -1 ].posicao - 52); 
         return;// retornamos porque como a logica abaixo se refere ao tabuleiro
     } 
