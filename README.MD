@@ -36,6 +36,10 @@ Projeto de um jogo ludo na linguagem c para o curso de engenharia da Computaçã
 
 - mostraPosicaoDasPecas -> Mostra a posicao de cada peça do jogador para que ele saiba onde esta cada uma para escolher qual movimentar.
 
+### Modelo de tabuleiro usado 
+
+![Tabuleiro](https://i.imgur.com/1xmW7Xo.jpg)
+
 
  
 
