@@ -4,13 +4,8 @@
 #include<stdlib.h>
 #include<time.h>
 #include<stdbool.h>
+#include <Windows.h>
 
-
-#ifdef _WIN32 || _WIN64
-    #include <Windows.h>
-#else
-    #include <unistd.h>
-#endif
 
 int tabuleiro[53];
 int areaSegura[8] = {1, 9, 14, 22, 27, 35, 40, 48};
